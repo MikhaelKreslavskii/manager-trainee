@@ -1,0 +1,35 @@
+version: "3"
+services:
+  db:
+    container_name: "db"
+    image: mongo:7.0.16-jammy
+    networks:
+      db:
+    ports:
+      - "${DB_PORT:-27017}:27017"
+  backend:
+    container_name: "backend"
+    build:
+      context: ./app/
+      dockerfile: Dockerfile
+    networks:
+      backend:
+      db:
+    depends_on:
+      - "db"
+  frontend:
+    container_name: "frontend"
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    networks:
+      frontend:
+      backend:
+    ports:
+      - "${APP_PORT:-443}:443"
+    depends_on:
+      - "backend"
+networks:
+  frontend:
+  backend:
+  db:
