@@ -1,0 +1,495 @@
+openapi: 3.0.3
+info:
+  title: Sales Manager Training API
+  description: |
+    API для тренировки менеджеров по продажам через GigaChat
+    Этот API предназначен для тренировки менеджеров по продажам с помощью GigaChat. 
+    Позволяет моделировать взаимодействие с виртуальными клиентами, анализировать диалоги и получать обратную связь.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Локальный сервер
+
+paths:
+  /users:
+    get:
+      summary: Получение списка пользователей
+      tags:
+        - Пользователи
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  
+  /users/{user_id}:
+    get:
+      summary: Получение информации о пользователе
+      tags:
+        - Пользователи
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /users/register:
+    post:
+      summary: Регистрация нового пользователя
+      tags:
+        - Пользователи
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+  
+  /users/login:
+    post:
+      summary: Авторизация пользователя
+      tags:
+        - Пользователи
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    
+  /dialogs:
+    get:
+      summary: Получение списка диалогов
+      tags:
+        - Диалоги
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/UUID'
+          description: Если указан, вернёт диалоги конкретного пользователя, иначе вернёт диалоги всех пользователей
+      responses:
+        '200':
+          description: Список диалогов (всех или одного пользователя)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Dialog'
+                  - type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          $ref: '#/components/schemas/UUID'
+                        dialogs:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Dialog'
+                        
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      summary: Создание нового диалога
+      tags:
+        - Диалоги
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DialogCreate'
+      responses:
+        '201':
+          description: Диалог успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dialog'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /dialogs/{dialog_id}:
+    get:
+      summary: Получение информации о конкретном диалоге
+      tags:
+        - Диалоги
+      parameters:
+        - name: dialog_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: Данные конкретного диалога
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dialog'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Удаление диалога
+      tags:
+        - Диалоги
+      parameters:
+        - name: dialog_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '204':
+          description: Диалог успешно удалён
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /dialogs/{dialog_id}/messages:
+    get:
+      summary: Получение списка сообщений в диалоге
+      tags:
+        - Сообщения
+      parameters:
+        - name: dialog_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: Список сообщений в указанном диалоге
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    post:
+      summary: Отправка сообщения в диалог
+      tags:
+        - Сообщения
+      parameters:
+        - name: dialog_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreate'
+      responses:
+        '201':
+          description: Сообщение успешно отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /dialogs/{dialog_id}/messages/{message_id}:
+    get:
+      summary: Получение конкретного сообщения в диалоге
+      tags:
+        - Сообщения
+      parameters:
+        - name: dialog_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: message_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        '200':
+          description: Данные сообщения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  
+  /client-types:
+    get:
+      summary: Получение списка типов клиентов
+      tags:
+        - Настройки запроса
+      responses:
+        '200':
+          description: Список типов клиентов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientType'
+
+  /scenarios:
+    get:
+      summary: Получение списка сценариев
+      tags:
+        - Настройки запроса
+      responses:
+        '200':
+          description: Список сценариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Scenario'
+  
+components:
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    
+    BaseTypeID:
+      type: integer
+      format: int64
+
+    ClientTypeID:
+      allOf:
+        - $ref: '#/components/schemas/BaseTypeID'
+
+    ScenarioID:
+      allOf:
+        - $ref: '#/components/schemas/BaseTypeID'
+      
+    User:
+      type: object
+      required: [id, name, email, role, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [junior, middle, senior]
+        created_at:
+          type: string
+          format: date-time
+
+    Dialog:
+      type: object
+      required: [id, user_id, title, client_id, scenario_id, status, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        user_id:
+          $ref: '#/components/schemas/UUID'
+        client_id:
+          $ref: '#/components/schemas/ClientTypeID'
+        scenario_id:
+          $ref: '#/components/schemas/ScenarioID'
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, completed]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      required: [id, dialog_id, text, author, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        dialog_id:
+          $ref: '#/components/schemas/UUID'
+        text:
+          type: string
+        author:
+          type: string
+          enum: [Manager, Client]
+        created_at:
+          type: string
+          format: date-time
+      
+    BaseType:
+      type: object
+      required: [id, title, prompt]
+      properties:
+        id:
+          $ref: '#/components/schemas/BaseTypeID'
+        title:
+          type: string
+        prompt:
+          type: string
+
+    ClientType:
+      allOf:
+        - $ref: '#/components/schemas/BaseType'
+    
+    Scenario:
+      allOf:
+        - $ref: '#/components/schemas/BaseType'
+    
+    UserCreate:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [junior, middle, senior]
+    
+    UserLogin:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: [Bearer]
+    
+    DialogCreate:
+      type: object
+      required: [title, client_id, scenario_id]
+      properties:
+        title:
+          type: string
+        client_id:
+          $ref: '#/components/schemas/ClientTypeID'
+        scenario_id:
+          $ref: '#/components/schemas/ScenarioID'
+    
+    MessageCreate:
+      type: object
+      required: [text, author]
+      properties:
+        text:
+          type: string
+        author:
+          type: string
+          enum: [Manager, Client]
+  
+  responses:
+    UnauthorizedError:
+      description: Требуется авторизация
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Неавторизованный доступ"
+
+    NotFoundError:
+      description: Запрашиваемый ресурс не найден
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Ресурс не найден"
+
+    BadRequestError:
+      description: Ошибка валидации данных
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Некорректные данные запроса"
+
+    ConflictError:
+      description: Конфликт данных (например, попытка зарегистрировать уже существующего пользователя)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Такой пользователь уже существует"
+
+    ForbiddenError:
+      description: Доступ запрещён
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "У вас нет доступа к этому ресурсу"
