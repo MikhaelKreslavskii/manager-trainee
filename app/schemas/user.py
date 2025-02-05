@@ -1,8 +1,8 @@
 from beanie import Document
+from pydantic import Field
 
 
 class User(Document):
-    id: str
     name: str
     role: str
-    email: str
+    email: str = Field(unique=True)

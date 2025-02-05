@@ -10,3 +10,5 @@ docker-compose up -d
 ``` client = MongoClient("mongodb://admin:secret@localhost:27017") ```
 3. Остановить контейнер \
 ```docker-compose down```
+4. Полностью удалить образ, контейнер и вольюм
+```docker-compose down -v```
