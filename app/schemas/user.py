@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from beanie import Document
 
 
-class User(BaseModel):
+class User(Document):
     id: str
     name: str
     role: str

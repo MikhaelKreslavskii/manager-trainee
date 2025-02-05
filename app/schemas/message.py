@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from beanie import Document
 from datetime import datetime
 
 
-class Message(BaseModel):
+class Message(Document):
     id: str
     dialog_id: str
     author: str

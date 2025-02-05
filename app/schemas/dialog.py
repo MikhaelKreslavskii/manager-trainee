@@ -1,9 +1,9 @@
-from pydantic import BaseModel
 from typing import Union
 from datetime import datetime
+from beanie import Document
 
 
-class Dialog(BaseModel):
+class Dialog(Document):
     id: str
     user_id: str
     model_id: str
