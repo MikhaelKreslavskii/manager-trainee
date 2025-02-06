@@ -15,3 +15,7 @@ class DialogService:
         dialog = Dialog(**dialog_data)
         await dialog.insert()
         return dialog
+
+    async def read_user_dialog(self, user_id):
+        dialogs = await Dialog.find(Dialog.user_id == user_id).to_list()
+        return dialogs

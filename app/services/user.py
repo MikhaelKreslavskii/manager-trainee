@@ -13,7 +13,6 @@ class UserService:
             user = await User.get(document_id=user_id)
         else:
             user = await User.find_one(User.name == user_name)
-        print(user)
         return user
 
     async def read_many(self, **kwargs: Any) -> Union[list[User], None]:

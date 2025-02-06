@@ -6,21 +6,21 @@ from app.schemas.message import Message
 router = APIRouter(tags=["Messages"])
 
 
-@router.post('/messages', response_model=Message)
-async def create_message(message_data: Message):
+@router.post('/dialogs/{dialog_id}/messages', response_model=Message)
+async def create_message(message_data: Message, dialog_id: str):
     try:
         service = MessageService()
-        message = await service.create_message(message_data=message_data.dict())
+        message = await service.create_message(message_data=message_data.dict(), dialog_id=dialog_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return message
 
 
-@router.get('/messages')
-async def get_messages() -> list[Message]:
+@router.get('/dialogs/{dialog_id}/messages')
+async def get_messages(dialog_id: str) -> list[Message]:
     try:
         service = MessageService()
-        return await service.read_many()
+        return await service.read_many(dialog_id=dialog_id)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
