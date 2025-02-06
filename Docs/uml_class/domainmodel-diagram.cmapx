@@ -1,0 +1,25 @@
+<map id="domainmodel-diagram_map" name="domainmodel-diagram_map">
+<area shape="rect" id="id1" href="Dialogue" title="Dialogue" alt="" coords="1632,473,1682,489"/>
+<area shape="rect" id="id2" href="Dialogue" title="Dialogue" alt="" coords="1544,505,1594,522"/>
+<area shape="rect" id="id3" href="Dialogue" title="Dialogue" alt="" coords="1684,505,1734,522"/>
+<area shape="rect" id="id4" href="Dialogue" title="Dialogue" alt="" coords="2391,1669,2441,1685"/>
+<area shape="rect" id="id5" href="Dialogue" title="Dialogue" alt="" coords="1529,2001,1579,2017"/>
+<area shape="rect" id="id6" href="Dialogue" title="Dialogue" alt="" coords="2710,132,2760,149"/>
+<area shape="rect" id="id7" href="Message" title="Message" alt="" coords="2625,1335,2678,1352"/>
+<area shape="rect" id="id8" href="AnalysisReport" title="AnalysisReport" alt="" coords="2279,1800,2367,1816"/>
+<area shape="rect" id="id9" href="TrainingSession" title="TrainingSession" alt="" coords="1321,1187,1413,1204"/>
+<area shape="rect" id="id10" href="TrainingSession" title="TrainingSession" alt="" coords="1160,1533,1252,1550"/>
+<area shape="rect" id="id11" href="TrainingSession" title="TrainingSession" alt="" coords="1630,489,1722,505"/>
+<area shape="rect" id="id12" href="TrainingSession" title="TrainingSession" alt="" coords="1587,522,1679,538"/>
+<area shape="rect" id="id13" href="RequestMessage" title="RequestMessage" alt="" coords="2328,107,2429,124"/>
+<area shape="rect" id="id14" href="RequestMessage" title="RequestMessage" alt="" coords="1204,1089,1305,1105"/>
+<area shape="rect" id="id15" href="RequestMessage" title="RequestMessage" alt="" coords="2292,42,2393,58"/>
+<area shape="rect" id="id16" href="RequestMessage" title="RequestMessage" alt="" coords="2481,1270,2582,1286"/>
+<area shape="rect" id="id17" href="RequestMessage" title="RequestMessage" alt="" coords="2591,1237,2692,1254"/>
+<area shape="rect" id="id18" href="ResponseMessage" title="ResponseMessage" alt="" coords="2282,58,2393,75"/>
+<area shape="rect" id="id19" href="ResponseMessage" title="ResponseMessage" alt="" coords="2481,1205,2592,1221"/>
+<area shape="rect" id="id20" href="ResponseMessage" title="ResponseMessage" alt="" coords="2177,124,2288,140"/>
+<area shape="rect" id="id21" href="TrainingAnalysisReport" title="TrainingAnalysisReport" alt="" coords="1755,1702,1888,1718"/>
+<area shape="rect" id="id22" href="TrainingAnalysisReport" title="TrainingAnalysisReport" alt="" coords="1499,341,1632,358"/>
+<area shape="rect" id="id23" href="DialogueAnalysisReport" title="DialogueAnalysisReport" alt="" coords="1755,1734,1893,1751"/>
+</map>
