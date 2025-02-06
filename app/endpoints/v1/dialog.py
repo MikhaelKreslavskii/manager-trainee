@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 from fastapi import APIRouter, HTTPException
 from app.services.dialog import DialogService
 from app.schemas import Dialog
@@ -27,7 +27,7 @@ async def post_dialog(dialog: Dialog) -> Dialog:
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return new_dialog
-=======
+
 import os
 
 from fastapi import APIRouter, Path
@@ -95,4 +95,4 @@ async def sendMessage(messages: List[Message]):
             "status": 500,
             "error": str(e)
         }
->>>>>>> kreslavskii/feature/gigachat_dialog
+

@@ -3,6 +3,7 @@ from beanie import init_beanie
 from dotenv import load_dotenv
 import os
 from app.schemas import Client, Scenario, User, Message, Dialog
+from app.schemas.user import UserCreate
 
 # Подгружаем переменные окружения
 load_dotenv()
@@ -22,5 +23,5 @@ async def init_db():
     db = client.app_database
 
     # Инициализируем Beanie ODM с выбранной БД и списком моделей
-    await init_beanie(database=db, document_models=[Client, Scenario, User, Message, Dialog])
+    await init_beanie(database=db, document_models=[Client, Scenario, User, Message, Dialog, UserCreate])
 
