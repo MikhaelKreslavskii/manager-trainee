@@ -7,22 +7,23 @@ router = APIRouter(tags=["Dialogs"])
 
 
 @router.get('/dialogs')
-async def get_dialogs() -> list[dict]:
+async def get_dialogs() -> list[Dialog]:
     service = DialogService()
-    return await service.read_many()
+    dialogs = await service.read_many()
+    return dialogs
 
 
 @router.get('/dialogs/{dialog_id}')
-async def get_dialog(id: str):
+async def get_dialog(id: str) -> Dialog:
     service = DialogService()
-    return await service.read_one(id)
+    dialog = await service.read_one(id)
+    return dialog
 
 @router.post('/dialogs', response_model=Dialog)
 async def post_dialog(dialog: Dialog) -> Dialog:
     try:
-        new_dialog = DialogService()
-        await new_dialog.create_dialog(dialog_data=dialog.dict())
-
+        service = DialogService()
+        dialog = await service.create_dialog(dialog_data=dialog.dict())
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return new_dialog
+    return dialog

@@ -17,9 +17,19 @@ async def create_message(message_data: Message):
 
 
 @router.get('/messages')
-async def get_messages() -> Union[list, str, None]:
+async def get_messages() -> list[Message]:
     try:
         service = MessageService()
         return await service.read_many()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get('/messages/{message_id}')
+async def get_messages(message_id: str) -> Message:
+    try:
+        service = MessageService()
+        message = await service.read_one(message_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return message
