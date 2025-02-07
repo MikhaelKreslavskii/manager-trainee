@@ -62,7 +62,7 @@ class Messages(BaseModel):
     messages: List[Message]
 
 
-@router.post('/sendMessage/')
+@router.post('/sendMessage')
 async def sendMessage(messages: List[Message]):
     try:
         load_dotenv()

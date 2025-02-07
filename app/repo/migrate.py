@@ -15,13 +15,13 @@ async def migrate_initial_data(file_path: str):
         if not existing:
             new_scenario = Scenario(**scenario)
             await new_scenario.insert()
-            print(f"Scenario has been added {scenario["name"]}")
+            print(f"Scenario has been added {scenario['name']}")
 
     for client in client_data:
         existing = await Client.find_one(Client.name == client["name"])
         if not existing:
             new_client = Client(**client)
             await new_client.insert()
-            print(f"New client [{client["name"]}] has been added into DB")
+            print(f"New client [{client['name']}] has been added into DB")
 
 

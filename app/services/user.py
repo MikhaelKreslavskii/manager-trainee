@@ -43,8 +43,8 @@ class UserService:
 
         # Создание нового пользователя
         new_user = {
-            "name": '',
-            "role": '',
+            "name": user['name'],
+            "role": user['role'],
             "email": user["email"],
             "hashed_password": hashed_password
         }

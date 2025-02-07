@@ -10,5 +10,8 @@ class User(Document):
 
 
 class UserCreate(Document):
+    name:str
     email:str
+    role:str
     password:str
+
