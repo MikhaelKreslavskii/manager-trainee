@@ -1,0 +1,337 @@
+@startuml
+
+class TrainingSession #lightblue {
+    - id : int
+    - startedDatetime : DateTimeStamp
+    - updatedDatetime : DateTimeStamp
+    - dialogs : Set<Dialogue>
+    - rulesChecked : Set<Rule>
+    - rulesToCheck : Set<Rule>
+    - analysis : TrainingAnalysisReport
+}
+note top of TrainingSession
+    Один сеанс тренировки менеджера.
+    Может содержать либо:
+    • 1…∞ завершённых чатов,
+    • 1 [[TrainingAnalysisReport]],
+    либо:
+    • 1 незавершённый чат,
+    • 0…∞ завершённых чатов.
+    ' todo выразить вот это «…» в виде List или Set в поле
+
+    Жизненный цикл для сеанса тренировки
+    с момента последнего сообщения: 7 дней.
+    
+    ""dialogs"" содержит чаты [[Dialogue]] по
+    «one-to-many» (каждому [[TrainingSession]] —
+    несколько [[Dialogue]], но у каждого [[Dialogue]] может
+    быть только один [[TrainingSession]]).
+    
+    ""updatedDatetime"" — время последнего
+    обновления чата пользователем. Под об-
+    новлением может быть добавление сооб-
+    щения в чат.
+    Если разница между текущим тайм-
+    стампом и сохранённым ""updatedDatetime""
+    больше чем количество секунд в неделе
+    (7 дней), то такой объект ""TrainingSession""
+    удаляется из БД.
+end note
+TrainingSession --> Dialogue
+TrainingSession --> Rule
+TrainingSession --> TrainingAnalysisReport
+
+class Dialogue {
+    - id : int
+    - startedDatetime : DateTimeStamp
+    ' У чата жизненный цикл такой же
+    - status : DialogueStatus
+    - title : String
+    - rulesToCheck : Set<Rule>
+    - messages : List<RequestAndResponse>
+    - analysis : DialogueAnalysisReport
+    + getId() : int
+    + getStatus() : DialogueStatus
+    + getTitle() : String
+    + setTitle() : String
+    + getMessages() : List<RequestAndResponse>
+    + addMessage(msg: Message) : void
+}
+note left of Dialogue
+    Чат, идеологически, не может
+    существовать без хотя бы одно-
+    го сообщения. И этим сообщением
+    должно быть сообщение пользо-
+    вателя [[RequestMessage]]. (Для
+    сообщений системы пользователю
+    использовать фронтенд.)
+
+    ""id"" — идентификатор чата.
+    Выставление идентификатора должно
+    быть не в рамках каждого [[TrainingSession]],
+    а абсолютным (т.е. сквозная нумерация).
+    
+    ""title"" генерируется нейросетью
+    (как в ChatGPT после первого сообще-
+    ния пользователя).
+    Можно запрашивать краткий тезис о
+    содержании чата у второй нейросети.
+    Нужно добавлять в промпт контекст,
+    что отвечать тезисом «Чат с клиентом»
+    нейросетка не должна — это и так
+    очевидно: у нас ВСЕ чаты с клиентом.
+    И, однако, ""title"" не должен менеджеру
+    стать спойлером о том, каким диалог
+    будет по содержанию (каким его нейронка
+    намеревается сделать).
+    
+    ""rulesToCheck"" — правила, на которые
+    нейросеть должна менеджера проверять в
+    рамках конкретного чата.
+    Все правила в ""rules"" должны браться из
+    [[TrainingSession]], в рамках к-рого чат
+    и запущен, но в разумном количестве (1-4).
+end note
+
+enum DialogueStatus {
+    WAITING
+    PROCESSING
+    CLOSED
+}
+note bottom of DialogueStatus
+    Состояние диалога. Служит фронтенду,
+    что кнопки должны быть недостумными
+    и окрашены в серый цвет, и бэкенду,
+    что HTTP-методы на маршрут
+    ``/dialogue/{dialogue_uid}``. вернут ошибку.
+    
+    Само по себе существование объекта
+    класса [[Dialogue]] подразумевает, что
+    у этого объекта фоново состояние
+    «Создан». Ниже — более конкретные
+    состояния.
+    
+    • ""WAITING"" — чат создан и ожидает
+    ввода пользователя.
+    • ""PROCESSING"" — чат создан и в данный
+    момент занят генерацией ответа пользователю.
+    • ""CLOSED"" — чат создан и закрыт для
+    новых сообщений (переписка завершена
+    нейросетью (бизнес-клиент получил
+    ответ на свой вопрос или неожиданно
+    бросил трубку) или пользователь нажал
+    кнопку «Бросить трубку»).
+end note
+Dialogue --> DialogueStatus
+
+abstract class Message {
+    - content : String
+    - sendedDateTime : DateTimeStamp
+    + getContent() : String
+    + getDateTime() : DateTimeStamp
+}
+note top of Message
+    Репрезентирует одно любое
+    сообщение чата, будь то:
+    • сообщение-запрос [[RequestMessage]]
+    'TODO todo ниже я диаметрально неправильно написал
+    '(т.е. запрос, с которым бизнес-клиент
+    '«позвонил» менеджеру, а также все
+    'последующие сообщения от бизнес-клиента);
+    • сообщение-ответ [[ResponseMessage]]
+    (коим является всегда ответ от нейросети).
+    
+    Основание разделения на [[RequestMessage]]
+    и [[ResponseMessage]]: какие-то методы
+    работают только с сообщениями поль-
+    зователя, какие-то только с ответами
+    нейросети (валидация ответа одной
+    нейросети второй неросеткой). И какие-то
+    с обоими.
+end note
+
+Message <|-- RequestMessage
+class RequestMessage {
+    
+}
+
+Message <|-- ResponseMessage
+class ResponseMessage {
+    
+}
+note as MessagesNote
+    [[ResponseMessage]] — сообщение-ответ
+    (от нейросетки). Является ответом на
+    собщение-запрос [[RequestMessage]].
+    
+    [[RequestMessage]] — сообщение-запрос
+    (от пользователя). Является сообщением,
+    которое передаётся нейросетке.
+    
+    Оба — частные случаи [[Message]].
+    Разделяются для правильного определения
+    сигнатур методов.
+end note
+ResponseMessage .. MessagesNote
+RequestMessage .. MessagesNote
+
+class RequestAndResponse {
+    - request : RequestMessage
+    - response : ResponseMessage
+    + getRequest() : RequestMessage
+    + getResponse() : ResponseMessage
+    + getRequestAndResponse() : Map<RequestMessage, ResponseMessage>
+}
+note top of RequestAndResponse
+    Пара «сообщение пользо-
+    вателя — ответ нейросети».
+    Основная (но не единственная)
+    единица в чатах [[Dialogue]].
+end note
+RequestAndResponse --> ResponseMessage
+RequestAndResponse --> RequestMessage
+
+abstract class AnalysisReport {
+    - msg : NeuroAnalysisMessage
+    - analysisText : String
+    ' Метрики добавить
+}
+class DialogueAnalysisReport {
+    
+}
+AnalysisReport <|-- DialogueAnalysisReport
+class TrainingAnalysisReport {
+    
+}
+AnalysisReport <|-- TrainingAnalysisReport
+AnalysisReport --> NeuroAnalysisMessage
+
+note as AnalysisNote
+    [[TrainingAnalysisReport]] — анализ для всего сеанса тренировки.
+    
+    [[DialogueAnalysisReport]] — анализ для каждого чата.
+end note
+TrainingAnalysisReport .. AnalysisNote
+DialogueAnalysisReport .. AnalysisNote
+
+ResponseMessage <|-- NeuroAnalysisMessage
+class NeuroAnalysisMessage {
+    - msg : ResponseMessage
+}
+note bottom of NeuroAnalysisMessage
+    Сообщение, завершающее чат последним
+    ответом нейросетки, к-рый содержит
+    анализ по диалогу в текущем [[Dialogue]].
+    
+    Класс, ничем не отличающийся от обычного
+    ответа нейросети. Разве что здесь промпт
+    для получения ответа нейросети другой.
+    
+    Отражает текстовый (общий/обобщающий)
+    отзыв о знаниях менеджера. Используется
+    для класса [[AnalysisReport]].
+end note
+
+class Prompt {
+    - content : String
+    + getContent() : String
+    ' Должен генерироваться из категории Scenario и категории ClientType (и правил Rule)
+}
+
+note top of Prompt
+    Промпт. То, что отправляется нейросетке.
+    С фронтендом никак не взаимодействует.
+end note
+
+class PromptForAnalysis {
+    
+}
+Prompt <|-- PromptForAnalysis
+
+class PromptForNewDialogue {
+    + getContent() : String
+    + <<Create>> PromptForNewDialogue(ClientType, Scenario)
+}
+PromptForNewDialogue --> ClientType
+PromptForNewDialogue --> Scenario
+note bottom of PromptForNewDialogue
+    Промпт, который содержит
+    информацию о том, какой
+    типаж у клиента и какой
+    выбран сценарий.
+end note
+Prompt <|-- PromptForNewDialogue
+
+class PromptForNewMessage {
+    - userMsg : RequestMessage
+    - msgLimit : byte
+    - rules : Set<Rule>
+}
+Prompt <|-- PromptForNewMessage
+PromptForNewMessage --> Rule
+note bottom of PromptForNewMessage
+    ""rules"" используется для того,
+    чтобы передать нейросети информа-
+    цию о том, какие правила должны
+    оцениваться у менеджера.
+end note
+
+enum ClientType {
+    AGGRESSIVE
+    IMPRESSIVE
+    MELANCHOLIC
+    - content : String
+    + getContent() : String
+}
+enum Scenario {
+    - description : String
+    + getDescription() : String
+}
+
+class Rule {
+    - content : String
+    - category : RuleCategory
+}
+note top of Rule
+    Репрезентирует правило/закономер-
+    ность/обязанность, которой придержи-
+    вается менеджер по продажам для
+    наиболее успешной продажи.
+    
+    Примеры правил:
+    • Менеджер должен быть вежливым.
+    • Менеджер не должен грубить.
+    • Когда клиент высказывает сомнения,
+    менеджер должен приправлять продукт
+    позитивной оценкой и чьим-то опытом.
+end note
+' Пускай нейросетка будет ссылаться на текчтовое описание правила
+' Класс примеров валидации. и класс примеров Rules (причём для каждого Rule модет быть Set из классов-примеров)
+Rule --> RuleCategory
+
+enum RuleCategory {
+    STRATEGY
+    BEHAVIOUR
+    WAY_OF_SPEAKING
+    GESTURING
+    '- examples : List<Map<String, String>>
+}
+note bottom of RuleCategory
+    • ""WAY_OF_SPEAKING"" — манера речи;
+    всё что связано с предложениями.
+end note
+
+class Grade {
+    - grade : byte
+    + getGrade() : byte
+}
+note bottom of Grade
+    Репрезентирует десятибалльную оценку
+    (целое число от 1 до 10 включительно).
+end note
+
+interface Metric {
+    + compute() : Grade
+}
+
+@enduml
