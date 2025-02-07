@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi import FastAPI
+from app.repo.session import init_db
 from app.endpoints import v1_router
+from app.repo.migrate import migrate_initial_data
+
 
 from app.repo.session import init_db
 
@@ -13,7 +17,7 @@ app.include_router(v1_router, prefix="/api")
 async def on_startup():
     # Инициализируем подключение к Монго и Beani при старте приложения
     await init_db()
-
+    await migrate_initial_data("./initial_data.json")
 
 app.add_middleware(
     CORSMiddleware,
