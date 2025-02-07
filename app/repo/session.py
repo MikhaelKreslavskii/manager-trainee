@@ -6,9 +6,9 @@ from app.schemas import Client, Scenario, User, Message, Dialog
 
 # Подгружаем переменные окружения
 load_dotenv()
-DB_USER = os.getenv("MONGODB_USERNAME")
-DB_PASSWORD = os.getenv("MONGODB_PASSWORD")
-DB_PORT = os.getenv("DB_PORT")
+DB_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME")
+DB_PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
+DB_PORT = os.getenv("MONGO_PORT")
 DB_URL = os.getenv("DB_URL")
 
 client: AsyncIOMotorClient = None
