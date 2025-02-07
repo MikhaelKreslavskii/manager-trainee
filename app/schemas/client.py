@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from beanie import Document
 
 
-class Client(BaseModel):
-    id: str
+class Client(Document):
+    name: str
     prompt: str
     type: str
+    name: str

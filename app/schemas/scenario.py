@@ -1,7 +1,6 @@
-from pydantic import BaseModel
+from beanie import Document
 
 
-class Scenario(BaseModel):
-    id: str
+class Scenario(Document):
     prompt: str
     name: str

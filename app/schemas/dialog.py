@@ -1,14 +1,14 @@
-from pydantic import BaseModel
-from typing import Union
 from datetime import datetime
+from beanie import Document
+from pydantic import Field
+from typing import Optional
 
 
-class Dialog(BaseModel):
-    id: str
+class Dialog(Document):
     user_id: str
-    model_id: str
-    completionOptions: dict[Union[str, int], Union[str, bool, int]]
-    created_at: datetime
-    updated_at: datetime
-    messages: dict[str, Union[str, bool, int]]
-    evaluation: str
+    scenario_id: str
+    client_id: str
+    messages: Optional[list[str]]
+    evaluation: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
