@@ -1,7 +1,8 @@
 # Инициализация БД
-FROM mongo:latest
+FROM mongo:7.0.16-jammy
 
+WORKDIR /docker-entrypoint-initdb.d
 # Копируем скрипт инициализации DB
-COPY init.js /docker-entrypoint-initdb.d/
+COPY ./init.js ./
 
 EXPOSE 27017
